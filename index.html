@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>🎄 Christmas Secret Name Generator 🎅</title>
+    <style>
+        body {
+            font-family: "Arial";
+            background: linear-gradient(#b30000, #4b0000);
+            color: white;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .card {
+            background: rgba(255,255,255,0.15);
+            padding: 20px;
+            border-radius: 12px;
+            max-width: 420px;
+            margin: auto;
+            backdrop-filter: blur(4px);
+        }
+
+        input, button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 12px;
+            border-radius: 8px;
+            border: none;
+            font-size: 16px;
+        }
+
+        input {
+            background: #fff;
+        }
+
+        button {
+            background: #1d9f30;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #157324;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Snow effect */
+        @keyframes snow {
+            0% { transform: translateY(-10px); }
+            100% { transform: translateY(700px); }
+        }
+
+        .snowflake {
+            position: fixed;
+            top: -10px;
+            color: white;
+            font-size: 18px;
+            animation: snow linear infinite;
+        }
+    </style>
+</head>
+<body>
+
+<h1>🎄 Secret Name Generator 🎅</h1>
+<p>Enter your name to get your secret partner!</p>
+
+<div class="card" id="drawBox">
+    <input id="yourName" placeholder="Type your name..." />
+    <button onclick="drawName()">Draw My Name 🎁</button>
+</div>
+
+<div class="card hidden" id="resultBox">
+    <h2>Your Match:</h2>
+    <p id="assignedName" style="font-size:26px; font-weight:bold;"></p>
+    <button onclick="resetPage()">Reset</button>
+</div>
+
+<script>
+// --- PRELOADED NAMES ---
+let original = [
+    "Armaan",
+    "Noaman",
+    "Salman",
+    "Zeshan",
+    "Mom",
+    "Dad",
+    "Monica",
+    "Amnah"
+];
+
+let remaining = [...original];
+
+// --- DRAW FUNCTION ---
+function drawName() {
+    const input = document.getElementById("yourName").value.trim().toLowerCase();
+
+    if (!input) return alert("Please enter your name.");
+
+    const realName = original.find(n => n.toLowerCase() === input);
+    if (!realName) return alert("Your name isn't on the list.");
+
+    // Filter out their own name
+    const pool = remaining.filter(n => n.toLowerCase() !== input);
+
+    if (pool.length === 0) {
+        return alert("You're the last one left — no names available!");
+    }
+
+    const chosen = pool[Math.floor(Math.random() * pool.length)];
+
+    // Remove chosen name from remaining pool
+    remaining = remaining.filter(n => n !== chosen);
+
+    // Show result
+    document.getElementById("assignedName").textContent = chosen;
+    document.getElementById("drawBox").classList.add("hidden");
+    document.getElementById("resultBox").classList.remove("hidden");
+}
+
+// --- RESET ---
+function resetPage() {
+    location.reload();
+}
+
+// --- Add falling snow ---
+for (let i = 0; i < 50; i++) {
+    let snow = document.createElement("div");
+    snow.innerHTML = "❄";
+    snow.classList.add("snowflake");
+    snow.style.left = Math.random() * 100 + "vw";
+    snow.style.animationDuration = (3 + Math.random() * 5) + "s";
+    snow.style.opacity = Math.random();
+    document.body.appendChild(snow);
+}
+</script>
+
+</body>
+</html>

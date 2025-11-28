@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>🎄 Secret Santa with Wishes 🎅</title>
+    <title>🎄 Secret Santa 🎅</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -51,6 +51,7 @@
 <!-- Wish Submission Card -->
 <div class="card" id="wishCard">
     <h2>Step 1: Submit Your Own Wishes</h2>
+    <p>You can only submit for yourself.</p>
     <input id="wishName" placeholder="Enter your name" />
     <input id="wish1" placeholder="Wish #1" />
     <input id="wish2" placeholder="Wish #2" />
@@ -81,10 +82,10 @@
 <script>
 // --- Participants ---
 let participants = ["Armaan","Noaman","Salman","Zeshan","Mom","Dad","Monica","Amnah"];
-let wishes = {}; // key: lowercase name, value: array of 3 wishes
-let submittedWishes = new Set();
-let drawnSet = new Set();
-let availablePool = [...participants];
+let wishes = {}; // lowercase name => array of 3 wishes
+let submittedWishes = new Set(); // lowercase names
+let drawnSet = new Set();       // lowercase names
+let availablePool = [...participants]; // names that can still be drawn
 
 // --- Update remaining draw list ---
 function updateRemainingDrawList() {
@@ -106,15 +107,14 @@ function submitWishes() {
 
     let drawerName = name.toLowerCase();
 
-    // Only allow participant to submit their own wishes once
+    // Only allow participant to submit once
     if (submittedWishes.has(drawerName)) {
         document.getElementById("wishMessage").textContent = "You have already submitted your wishes!";
         return;
     }
 
-    // Check if name exists in participants list
-    let participant = participants.find(p => p.toLowerCase() === drawerName);
-    if (!participant) {
+    // Validate that the name exists in participants
+    if (!participants.some(p => p.toLowerCase() === drawerName)) {
         document.getElementById("wishMessage").textContent = "Your name isn't on the list!";
         return;
     }
@@ -123,7 +123,7 @@ function submitWishes() {
     wishes[drawerName] = [wish1, wish2, wish3];
     submittedWishes.add(drawerName);
 
-    // Clear inputs
+    // Clear fields
     document.getElementById("wishName").value = "";
     document.getElementById("wish1").value = "";
     document.getElementById("wish2").value = "";
@@ -151,19 +151,21 @@ function drawName() {
         return;
     }
 
-    // Eligible pool (cannot draw self)
+    // Eligible pool: can't draw yourself
     let eligible = availablePool.filter(p => p.toLowerCase() !== drawer.toLowerCase());
     if (eligible.length === 0) {
         document.getElementById("drawMessage").textContent = "No names left to draw!";
         return;
     }
 
-    // Pick a random name
+    // Random pick
     let chosen = eligible[Math.floor(Math.random() * eligible.length)];
+
+    // Remove chosen from availablePool
     availablePool = availablePool.filter(p => p !== chosen);
     drawnSet.add(drawer.toLowerCase());
 
-    // Display result
+    // Show result
     document.getElementById("assignedName").textContent = chosen;
     let ul = document.getElementById("assignedWishes");
     ul.innerHTML = "";

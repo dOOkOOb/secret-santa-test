@@ -91,7 +91,7 @@
 
 <script>
 // --- PRELOADED NAMES ---
-let remainingPool = [
+let allParticipants = [
     "Armaan",
     "Noaman",
     "Salman",
@@ -102,9 +102,16 @@ let remainingPool = [
     "Amnah"
 ];
 
-// --- UPDATE REMAINING LIST DISPLAY ---
+// Names that are still eligible to be drawn
+let availablePool = [...allParticipants];
+
+// Keep track of who has already drawn
+let drawnSet = new Set();
+
+// Update remaining list display
 function updateRemaining() {
-    document.getElementById("remainingList").textContent = remainingPool.join(", ");
+    let remaining = allParticipants.filter(name => !drawnSet.has(name));
+    document.getElementById("remainingList").textContent = remaining.join(", ");
 }
 updateRemaining();
 
@@ -113,25 +120,34 @@ function drawName() {
     let input = document.getElementById("yourName").value.trim();
     if (!input) return alert("Please enter your name.");
 
-    // Check if input is in pool
-    if (!remainingPool.some(n => n.toLowerCase() === input.toLowerCase())) {
-        alert("Either your name is not in the list or you already drew.");
+    // Check if the drawer has already drawn
+    if (drawnSet.has(input)) {
+        alert("You've already drawn a name!");
         return;
     }
 
-    // Build eligible pool (exclude themselves)
-    let eligible = remainingPool.filter(n => n.toLowerCase() !== input.toLowerCase());
+    // Check if drawer is in the participant list
+    if (!allParticipants.some(n => n.toLowerCase() === input.toLowerCase())) {
+        alert("Your name isn't on the list.");
+        return;
+    }
+
+    // Build eligible pool for this drawer (exclude themselves)
+    let eligible = availablePool.filter(n => n.toLowerCase() !== input.toLowerCase());
 
     if (eligible.length === 0) {
-        alert("You're the last one left — no names available!");
+        alert("No names left for you to draw!");
         return;
     }
 
-    // Randomly pick from eligible pool
+    // Pick a random name
     let chosen = eligible[Math.floor(Math.random() * eligible.length)];
 
-    // Remove the chosen name and the drawer from pool
-    remainingPool = remainingPool.filter(n => n !== chosen && n.toLowerCase() !== input.toLowerCase());
+    // Remove chosen from available pool globally
+    availablePool = availablePool.filter(n => n !== chosen);
+
+    // Mark drawer as having drawn
+    drawnSet.add(input);
 
     // Show result
     document.getElementById("assignedName").textContent = chosen;

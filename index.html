@@ -102,27 +102,26 @@ let allParticipants = [
     "Amnah"
 ];
 
-// Names that are still eligible to be drawn
+// Names still available to be drawn
 let availablePool = [...allParticipants];
 
-// Keep track of who has already drawn (store lowercase for case-insensitive checks)
+// Keep track of who has already drawn (store in lowercase for case-insensitive matching)
 let drawnSet = new Set();
 
-// Update remaining list display (case-insensitive)
+// --- Update remaining participants display ---
 function updateRemaining() {
-    let remaining = allParticipants.filter(name => 
-        !drawnSet.has(name.toLowerCase())
-    );
+    // Only show participants who haven't drawn yet (case-insensitive)
+    let remaining = allParticipants.filter(name => !drawnSet.has(name.toLowerCase()));
     document.getElementById("remainingList").textContent = remaining.join(", ");
 }
 updateRemaining();
 
-// --- DRAW FUNCTION ---
+// --- Draw function ---
 function drawName() {
     let input = document.getElementById("yourName").value.trim();
     if (!input) return alert("Please enter your name.");
 
-    // Case-insensitive match for drawer
+    // Find the drawer case-insensitively
     let drawer = allParticipants.find(n => n.toLowerCase() === input.toLowerCase());
     if (!drawer) return alert("Your name isn't on the list.");
 
@@ -135,17 +134,16 @@ function drawName() {
     let eligible = availablePool.filter(n => n.toLowerCase() !== drawer.toLowerCase());
 
     if (eligible.length === 0) {
-        alert("No names left for you to draw!");
-        return;
+        return alert("No names left for you to draw!");
     }
 
     // Pick a random name
     let chosen = eligible[Math.floor(Math.random() * eligible.length)];
 
-    // Remove chosen from available pool globally
+    // Remove chosen globally from available pool
     availablePool = availablePool.filter(n => n !== chosen);
 
-    // Mark drawer as having drawn
+    // Mark drawer as drawn (store lowercase)
     drawnSet.add(drawer.toLowerCase());
 
     // Show result
@@ -157,7 +155,7 @@ function drawName() {
     updateRemaining();
 }
 
-// --- NEXT PERSON ---
+// --- Next person ---
 function nextPerson() {
     document.getElementById("yourName").value = "";
     document.getElementById("drawBox").classList.remove("hidden");

@@ -1,30 +1,23 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>🎄 Christmas Secret Name Generator 🎅</title>
+    <title>🎄 Secret Santa 🎅</title>
     <style>
         body {
-            font-family: "Arial";
+            font-family: Arial, sans-serif;
             background: linear-gradient(#b30000, #4b0000);
             color: white;
             text-align: center;
-            padding: 40px 20px;
+            padding: 30px 20px;
         }
-
-        h1 {
-            font-size: 32px;
-            margin-bottom: 10px;
-        }
-
         .card {
             background: rgba(255,255,255,0.15);
             padding: 20px;
             border-radius: 12px;
-            max-width: 420px;
-            margin: auto;
+            max-width: 500px;
+            margin: 20px auto;
             backdrop-filter: blur(4px);
         }
-
         input, button {
             width: 100%;
             padding: 12px;
@@ -33,144 +26,164 @@
             border: none;
             font-size: 16px;
         }
-
         input {
             background: #fff;
+            color: #000;
         }
-
         button {
             background: #1d9f30;
             color: white;
             font-weight: bold;
             cursor: pointer;
         }
-
         button:hover {
             background: #157324;
         }
-
         .hidden {
             display: none;
-        }
-
-        /* Snow effect */
-        @keyframes snow {
-            0% { transform: translateY(-10px); }
-            100% { transform: translateY(700px); }
-        }
-
-        .snowflake {
-            position: fixed;
-            top: -10px;
-            color: white;
-            font-size: 18px;
-            animation: snow linear infinite;
         }
     </style>
 </head>
 <body>
 
-<h1>🎄 Secret Name Generator 🎅</h1>
-<p>Enter your name to get your secret partner!</p>
+<h1>🎄 Secret Santa with Wishes 🎅</h1>
 
-<div class="card" id="drawBox">
-    <input id="yourName" placeholder="Type your name..." />
-    <button onclick="drawName()">Draw My Name 🎁</button>
+<!-- Wish Submission Card -->
+<div class="card" id="wishCard">
+    <h2>Step 1: Submit Your Wishes</h2>
+    <input id="wishName" placeholder="Enter your name" />
+    <input id="wish1" placeholder="Wish #1" />
+    <input id="wish2" placeholder="Wish #2" />
+    <input id="wish3" placeholder="Wish #3" />
+    <button onclick="submitWishes()">Submit Wishes</button>
+    <p id="wishMessage" style="margin-top:12px;"></p>
 </div>
 
-<div class="card hidden" id="resultBox">
-    <h2>Your Match:</h2>
-    <p id="assignedName" style="font-size:26px; font-weight:bold;"></p>
-    <button onclick="nextPerson()">Next Person</button>
+<!-- Draw Card -->
+<div class="card hidden" id="drawCard">
+    <h2>Step 2: Draw a Name</h2>
+    <input id="drawNameInput" placeholder="Enter your name" />
+    <button onclick="drawName()">Draw 🎁</button>
+    <p id="drawMessage" style="margin-top:12px;"></p>
+    <h3>Remaining Participants to Draw:</h3>
+    <p id="remainingDrawList"></p>
 </div>
 
-<div class="card">
-    <h3>Participants Remaining:</h3>
-    <p id="remainingList"></p>
+<!-- Result Card -->
+<div class="card hidden" id="resultCard">
+    <h2>Your Secret Santa Match:</h2>
+    <p id="assignedName" style="font-size:24px; font-weight:bold;"></p>
+    <h3>Their Wishes:</h3>
+    <ul id="assignedWishes"></ul>
+    <button onclick="nextDrawer()">Next Person</button>
 </div>
 
 <script>
-// --- PRELOADED NAMES ---
-let allParticipants = [
-    "Armaan",
-    "Noaman",
-    "Salman",
-    "Zeshan",
-    "Mom",
-    "Dad",
-    "Monica",
-    "Amnah"
-];
-
-// Names still available to be drawn
-let availablePool = [...allParticipants];
-
-// Keep track of who has already drawn (store in lowercase for case-insensitive matching)
+// --- Participants ---
+let participants = ["Armaan","Noaman","Salman","Zeshan","Mom","Dad","Monica","Amnah"];
+let wishes = {}; // key: lowercase name, value: array of 3 wishes
+let submittedWishes = new Set();
 let drawnSet = new Set();
+let availablePool = [...participants];
 
-// --- Update remaining participants display ---
-function updateRemaining() {
-    // Only show participants who haven't drawn yet (case-insensitive)
-    let remaining = allParticipants.filter(name => !drawnSet.has(name.toLowerCase()));
-    document.getElementById("remainingList").textContent = remaining.join(", ");
+// --- Update remaining draw list ---
+function updateRemainingDrawList() {
+    let remaining = participants.filter(p => !drawnSet.has(p.toLowerCase()));
+    document.getElementById("remainingDrawList").textContent = remaining.join(", ");
 }
-updateRemaining();
 
-// --- Draw function ---
+// --- Submit Wishes ---
+function submitWishes() {
+    let name = document.getElementById("wishName").value.trim();
+    let wish1 = document.getElementById("wish1").value.trim();
+    let wish2 = document.getElementById("wish2").value.trim();
+    let wish3 = document.getElementById("wish3").value.trim();
+
+    if (!name || !wish1 || !wish2 || !wish3) {
+        document.getElementById("wishMessage").textContent = "Please fill in all fields.";
+        return;
+    }
+
+    let participant = participants.find(p => p.toLowerCase() === name.toLowerCase());
+    if (!participant) {
+        document.getElementById("wishMessage").textContent = "Your name isn't on the list!";
+        return;
+    }
+
+    if (submittedWishes.has(participant.toLowerCase())) {
+        document.getElementById("wishMessage").textContent = "You've already submitted your wishes!";
+        return;
+    }
+
+    wishes[participant.toLowerCase()] = [wish1, wish2, wish3];
+    submittedWishes.add(participant.toLowerCase());
+    document.getElementById("wishMessage").textContent = `Wishes submitted! (${submittedWishes.size}/${participants.length})`;
+
+    // Clear inputs
+    document.getElementById("wishName").value = "";
+    document.getElementById("wish1").value = "";
+    document.getElementById("wish2").value = "";
+    document.getElementById("wish3").value = "";
+
+    // Move to draw phase if everyone submitted
+    if (submittedWishes.size === participants.length) {
+        document.getElementById("wishCard").classList.add("hidden");
+        document.getElementById("drawCard").classList.remove("hidden");
+        updateRemainingDrawList();
+    }
+}
+
+// --- Draw Name ---
 function drawName() {
-    let input = document.getElementById("yourName").value.trim();
-    if (!input) return alert("Please enter your name.");
+    if (submittedWishes.size < participants.length) {
+        document.getElementById("drawMessage").textContent = "Everyone must submit wishes first!";
+        return;
+    }
 
-    // Find the drawer case-insensitively
-    let drawer = allParticipants.find(n => n.toLowerCase() === input.toLowerCase());
-    if (!drawer) return alert("Your name isn't on the list.");
+    let nameInput = document.getElementById("drawNameInput").value.trim();
+    if (!nameInput) return;
 
-    // Check if drawer already drew
+    let drawer = participants.find(p => p.toLowerCase() === nameInput.toLowerCase());
+    if (!drawer) {
+        document.getElementById("drawMessage").textContent = "Your name isn't on the list!";
+        return;
+    }
+
     if (drawnSet.has(drawer.toLowerCase())) {
-        return alert("You've already drawn a name!");
+        document.getElementById("drawMessage").textContent = "You've already drawn a name!";
+        return;
     }
 
-    // Build eligible pool for this drawer (exclude themselves)
-    let eligible = availablePool.filter(n => n.toLowerCase() !== drawer.toLowerCase());
-
+    let eligible = availablePool.filter(p => p.toLowerCase() !== drawer.toLowerCase());
     if (eligible.length === 0) {
-        return alert("No names left for you to draw!");
+        document.getElementById("drawMessage").textContent = "No names left to draw!";
+        return;
     }
 
-    // Pick a random name
     let chosen = eligible[Math.floor(Math.random() * eligible.length)];
-
-    // Remove chosen globally from available pool
-    availablePool = availablePool.filter(n => n !== chosen);
-
-    // Mark drawer as drawn (store lowercase)
+    availablePool = availablePool.filter(p => p !== chosen);
     drawnSet.add(drawer.toLowerCase());
 
-    // Show result
+    // Display result
     document.getElementById("assignedName").textContent = chosen;
-    document.getElementById("drawBox").classList.add("hidden");
-    document.getElementById("resultBox").classList.remove("hidden");
+    let ul = document.getElementById("assignedWishes");
+    ul.innerHTML = "";
+    wishes[chosen.toLowerCase()].forEach(w => {
+        let li = document.createElement("li");
+        li.textContent = w;
+        ul.appendChild(li);
+    });
 
-    // Update remaining participants
-    updateRemaining();
+    document.getElementById("drawCard").classList.add("hidden");
+    document.getElementById("resultCard").classList.remove("hidden");
+    document.getElementById("drawNameInput").value = "";
+    updateRemainingDrawList();
 }
 
-// --- Next person ---
-function nextPerson() {
-    document.getElementById("yourName").value = "";
-    document.getElementById("drawBox").classList.remove("hidden");
-    document.getElementById("resultBox").classList.add("hidden");
-}
-
-// --- Add falling snow ---
-for (let i = 0; i < 50; i++) {
-    let snow = document.createElement("div");
-    snow.innerHTML = "❄";
-    snow.classList.add("snowflake");
-    snow.style.left = Math.random() * 100 + "vw";
-    snow.style.animationDuration = (3 + Math.random() * 5) + "s";
-    snow.style.opacity = Math.random();
-    document.body.appendChild(snow);
+// --- Next Drawer ---
+function nextDrawer() {
+    document.getElementById("resultCard").classList.add("hidden");
+    document.getElementById("drawCard").classList.remove("hidden");
 }
 </script>
 

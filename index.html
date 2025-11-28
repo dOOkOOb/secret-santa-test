@@ -97,6 +97,7 @@ let original = [
     "Amnah"
 ];
 
+// Make a global pool of remaining names
 let remaining = [...original];
 
 // --- DRAW FUNCTION ---
@@ -108,16 +109,17 @@ function drawName() {
     const realName = original.find(n => n.toLowerCase() === input);
     if (!realName) return alert("Your name isn't on the list.");
 
-    // Filter out their own name
+    // Eligible pool: exclude themselves and any names already drawn
     const pool = remaining.filter(n => n.toLowerCase() !== input);
 
     if (pool.length === 0) {
         return alert("You're the last one left — no names available!");
     }
 
+    // Pick a random name
     const chosen = pool[Math.floor(Math.random() * pool.length)];
 
-    // Remove chosen name from remaining pool
+    // Remove the chosen name from the global remaining pool
     remaining = remaining.filter(n => n !== chosen);
 
     // Show result

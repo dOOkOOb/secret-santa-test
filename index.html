@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>🎄 Secret Santa 🎅</title>
+    <title>🎄 Secret Santa with Wishes 🎅</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -115,6 +115,7 @@ function submitWishes() {
         return;
     }
 
+    // Save wishes
     wishes[participant.toLowerCase()] = [wish1, wish2, wish3];
     submittedWishes.add(participant.toLowerCase());
     document.getElementById("wishMessage").textContent = `Wishes submitted! (${submittedWishes.size}/${participants.length})`;
@@ -125,7 +126,7 @@ function submitWishes() {
     document.getElementById("wish2").value = "";
     document.getElementById("wish3").value = "";
 
-    // Move to draw phase if everyone submitted
+    // Move to draw phase only when everyone has submitted
     if (submittedWishes.size === participants.length) {
         document.getElementById("wishCard").classList.add("hidden");
         document.getElementById("drawCard").classList.remove("hidden");
@@ -136,7 +137,7 @@ function submitWishes() {
 // --- Draw Name ---
 function drawName() {
     if (submittedWishes.size < participants.length) {
-        document.getElementById("drawMessage").textContent = "Everyone must submit wishes first!";
+        document.getElementById("drawMessage").textContent = "Waiting for all participants to submit their wishes!";
         return;
     }
 

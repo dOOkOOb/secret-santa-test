@@ -105,13 +105,13 @@ let allParticipants = [
 // Names that are still eligible to be drawn
 let availablePool = [...allParticipants];
 
-// Keep track of who has already drawn
+// Keep track of who has already drawn (store lowercase for case-insensitive checks)
 let drawnSet = new Set();
 
 // Update remaining list display (case-insensitive)
 function updateRemaining() {
     let remaining = allParticipants.filter(name => 
-        ![...drawnSet].some(d => d.toLowerCase() === name.toLowerCase())
+        !drawnSet.has(name.toLowerCase())
     );
     document.getElementById("remainingList").textContent = remaining.join(", ");
 }
@@ -127,7 +127,7 @@ function drawName() {
     if (!drawer) return alert("Your name isn't on the list.");
 
     // Check if drawer already drew
-    if (drawnSet.has(drawer)) {
+    if (drawnSet.has(drawer.toLowerCase())) {
         return alert("You've already drawn a name!");
     }
 
@@ -146,7 +146,7 @@ function drawName() {
     availablePool = availablePool.filter(n => n !== chosen);
 
     // Mark drawer as having drawn
-    drawnSet.add(drawer);
+    drawnSet.add(drawer.toLowerCase());
 
     // Show result
     document.getElementById("assignedName").textContent = chosen;

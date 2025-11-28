@@ -81,12 +81,17 @@
 <div class="card hidden" id="resultBox">
     <h2>Your Match:</h2>
     <p id="assignedName" style="font-size:26px; font-weight:bold;"></p>
-    <button onclick="resetPage()">Reset</button>
+    <button onclick="nextPerson()">Next Person</button>
+</div>
+
+<div class="card">
+    <h3>Participants Remaining:</h3>
+    <p id="remainingList"></p>
 </div>
 
 <script>
 // --- PRELOADED NAMES ---
-let original = [
+let remainingPool = [
     "Armaan",
     "Noaman",
     "Salman",
@@ -97,40 +102,51 @@ let original = [
     "Amnah"
 ];
 
-// Make a global pool of remaining names
-let remaining = [...original];
+// --- UPDATE REMAINING LIST DISPLAY ---
+function updateRemaining() {
+    document.getElementById("remainingList").textContent = remainingPool.join(", ");
+}
+updateRemaining();
 
 // --- DRAW FUNCTION ---
 function drawName() {
-    const input = document.getElementById("yourName").value.trim().toLowerCase();
-
+    let input = document.getElementById("yourName").value.trim();
     if (!input) return alert("Please enter your name.");
 
-    const realName = original.find(n => n.toLowerCase() === input);
-    if (!realName) return alert("Your name isn't on the list.");
-
-    // Eligible pool: exclude themselves and any names already drawn
-    const pool = remaining.filter(n => n.toLowerCase() !== input);
-
-    if (pool.length === 0) {
-        return alert("You're the last one left — no names available!");
+    // Check if input is in pool
+    if (!remainingPool.some(n => n.toLowerCase() === input.toLowerCase())) {
+        alert("Either your name is not in the list or you already drew.");
+        return;
     }
 
-    // Pick a random name
-    const chosen = pool[Math.floor(Math.random() * pool.length)];
+    // Build eligible pool (exclude themselves)
+    let eligible = remainingPool.filter(n => n.toLowerCase() !== input.toLowerCase());
 
-    // Remove the chosen name from the global remaining pool
-    remaining = remaining.filter(n => n !== chosen);
+    if (eligible.length === 0) {
+        alert("You're the last one left — no names available!");
+        return;
+    }
+
+    // Randomly pick from eligible pool
+    let chosen = eligible[Math.floor(Math.random() * eligible.length)];
+
+    // Remove the chosen name and the drawer from pool
+    remainingPool = remainingPool.filter(n => n !== chosen && n.toLowerCase() !== input.toLowerCase());
 
     // Show result
     document.getElementById("assignedName").textContent = chosen;
     document.getElementById("drawBox").classList.add("hidden");
     document.getElementById("resultBox").classList.remove("hidden");
+
+    // Update remaining participants
+    updateRemaining();
 }
 
-// --- RESET ---
-function resetPage() {
-    location.reload();
+// --- NEXT PERSON ---
+function nextPerson() {
+    document.getElementById("yourName").value = "";
+    document.getElementById("drawBox").classList.remove("hidden");
+    document.getElementById("resultBox").classList.add("hidden");
 }
 
 // --- Add falling snow ---

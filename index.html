@@ -120,20 +120,17 @@ function drawName() {
     let input = document.getElementById("yourName").value.trim();
     if (!input) return alert("Please enter your name.");
 
-    // Check if the drawer has already drawn
-    if (drawnSet.has(input)) {
-        alert("You've already drawn a name!");
-        return;
-    }
+    // Case-insensitive match for drawer
+    let drawer = allParticipants.find(n => n.toLowerCase() === input.toLowerCase());
+    if (!drawer) return alert("Your name isn't on the list.");
 
-    // Check if drawer is in the participant list
-    if (!allParticipants.some(n => n.toLowerCase() === input.toLowerCase())) {
-        alert("Your name isn't on the list.");
-        return;
+    // Check if drawer already drew
+    if (drawnSet.has(drawer)) {
+        return alert("You've already drawn a name!");
     }
 
     // Build eligible pool for this drawer (exclude themselves)
-    let eligible = availablePool.filter(n => n.toLowerCase() !== input.toLowerCase());
+    let eligible = availablePool.filter(n => n.toLowerCase() !== drawer.toLowerCase());
 
     if (eligible.length === 0) {
         alert("No names left for you to draw!");
@@ -147,7 +144,7 @@ function drawName() {
     availablePool = availablePool.filter(n => n !== chosen);
 
     // Mark drawer as having drawn
-    drawnSet.add(input);
+    drawnSet.add(drawer);
 
     // Show result
     document.getElementById("assignedName").textContent = chosen;
